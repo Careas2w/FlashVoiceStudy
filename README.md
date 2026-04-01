@@ -1,0 +1,1 @@
+Versión limpia funcional
