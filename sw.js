@@ -1,8 +1,9 @@
-const CACHE_NAME = 'hangukeo-mal-v10';
+const CACHE_NAME = 'korean-flashstudy-v12';
 const ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
+  './app.js',
   './icons/favicon-32.png',
   './icons/apple-touch-icon.png',
   './icons/icon-192.png',

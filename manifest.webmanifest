@@ -1,7 +1,7 @@
 {
-  "name": "한국어 말",
-  "short_name": "한국어 말",
-  "description": "한국어 말 · Flashcards y estudio de vocabulario coreano.",
+  "name": "Korean Flashstudy",
+  "short_name": "Korean Flashstudy",
+  "description": "Korean Flashstudy · Flashcards y estudio de vocabulario coreano con voz natural por Cloudflare Worker.",
   "lang": "es",
   "start_url": "./index.html",
   "scope": "./",

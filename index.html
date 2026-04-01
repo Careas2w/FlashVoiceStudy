@@ -1835,60 +1835,57 @@
       .handwrite-canvas{ height:280px; }
     }
 
-    .voice-overlay-card{
+  
+    .voice-overlay{
+      position:fixed;
+      inset:0;
+      background:var(--overlay);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+      z-index:1200;
+      backdrop-filter:blur(10px);
+    }
+    .voice-overlay.open{ display:flex; }
+    .voice-wrap{
       width:min(760px,100%);
       background:var(--panel);
       border:1px solid var(--line);
-      border-radius:24px;
+      border-radius:22px;
       box-shadow:var(--shadow);
       padding:18px;
     }
     .voice-grid{
       display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+      grid-template-columns:1fr 1fr;
       gap:12px;
-      margin:14px 0;
+      margin-top:14px;
     }
-    .voice-field{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-    }
-    .voice-field label{
-      font-size:12px;
-      font-weight:800;
-      color:var(--muted);
-    }
-    .voice-field input,
-    .voice-field select{
-      width:100%;
-      padding:10px 12px;
-      border-radius:12px;
-      border:1px solid var(--line);
-      background:var(--panel-2);
-      color:var(--text);
-      font-size:14px;
-      outline:none;
+    .voice-grid .form-field.full{
+      grid-column:1 / -1;
     }
     .voice-help{
-      margin-top:10px;
+      margin-top:14px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.5;
       background:var(--panel-2);
       border:1px solid var(--line);
-      border-radius:16px;
+      border-radius:14px;
       padding:12px;
-      font-size:13px;
-      line-height:1.45;
-      color:var(--muted);
     }
-    .voice-help strong{ color:var(--text); }
-    .voice-status{
-      margin-top:10px;
-      min-height:20px;
+    .voice-status-box{
+      margin-top:12px;
+      min-height:22px;
       font-size:13px;
       font-weight:700;
     }
-    .voice-status.ok{ color:var(--good); }
-    .voice-status.bad{ color:var(--bad); }
+    .voice-status-box.ok{ color:var(--good); }
+    .voice-status-box.bad{ color:var(--bad); }
+    @media (max-width:620px){
+      .voice-grid{ grid-template-columns:1fr; }
+    }
 
   </style>
 </head>
@@ -2012,7 +2009,7 @@
     <main class="main">
       <div class="hero-banner">
         <div>
-          <h1 class="hero-eyebrow"><span class="main-title">한국어 공부는 재밌어</span></h1>
+          <h1 class="hero-eyebrow">한국어 공부는 재밌어</h1>
           
         </div>
         
@@ -2024,7 +2021,6 @@
         <div class="audio-controls">
           <button class="mode-btn" id="slowAudioBtn">🐢 Lento</button>
           <button class="mode-btn active" id="normalAudioBtn">▶ Normal</button>
-          <button class="mode-btn" id="voiceSettingsBtn">🗣 Voz</button>
           <button class="mode-btn" id="flashcardsBtn">📚 Flashcards</button>
           <button class="mode-btn" id="mosaicBtn">🧱 Mosaico</button>
           <button class="mode-btn" id="writeBtn">✍ Escritura</button>
@@ -2062,6 +2058,7 @@
           </div>
 
           <button class="mode-btn" id="downloadStarBtnTop">Descargar ⭐</button>
+          <button class="mode-btn" id="voiceSettingsBtn">🗣 Voz</button>
         </div>
 
         <div class="display-controls">
@@ -2462,16 +2459,6 @@
     const NORMAL_AUDIO_RATE = 1.0;
     const SLOW_AUDIO_RATE = 0.55;
     let audioRate = NORMAL_AUDIO_RATE;
-    let currentAudio = null;
-    let currentAudioUrl = "";
-    const VOICE_CONFIG_KEY = "kfs-edge-voice-config-v1";
-    let voiceConfig = {
-      provider: "device",
-      proxyUrl: "",
-      apiKey: "",
-      koVoice: "ko-KR-SunHiNeural",
-      esVoice: "es-ES-ElviraNeural"
-    };
     let currentEditRowId = null;
     let tableStyle = { fontSize: 13, bold: true };
     let flashStyle = { fontSize: 62, bold: false };
@@ -2557,7 +2544,6 @@
     const listenBtn = document.getElementById("listenBtn");
     const mosaicBtn = document.getElementById("mosaicBtn");
     const mixBtn = document.getElementById("mixBtn");
-    const voiceSettingsBtn = document.getElementById("voiceSettingsBtn");
 
     const wrongPracticeDropdown = document.getElementById("wrongPracticeDropdown");
     const wrongPracticeBtn = document.getElementById("wrongPracticeBtn");
@@ -2573,18 +2559,6 @@
     const mixOverlay = document.getElementById("mixOverlay");
     const mosaicOverlay = document.getElementById("mosaicOverlay");
     const listOverlay = document.getElementById("listOverlay");
-    const voiceOverlay = document.getElementById("voiceOverlay");
-
-    const closeVoiceBtn = document.getElementById("closeVoiceBtn");
-    const voiceProviderSelect = document.getElementById("voiceProviderSelect");
-    const voiceProxyUrlInput = document.getElementById("voiceProxyUrlInput");
-    const voiceApiKeyInput = document.getElementById("voiceApiKeyInput");
-    const voiceKoInput = document.getElementById("voiceKoInput");
-    const voiceEsInput = document.getElementById("voiceEsInput");
-    const saveVoiceBtn = document.getElementById("saveVoiceBtn");
-    const testVoiceBtn = document.getElementById("testVoiceBtn");
-    const copyWorkerEndpointBtn = document.getElementById("copyWorkerEndpointBtn");
-    const voiceStatus = document.getElementById("voiceStatus");
 
     const studyModal = document.getElementById("studyModal");
     const studyModeTitle = document.getElementById("studyModeTitle");
@@ -2743,7 +2717,6 @@
     applySavedTheme();
     applySavedPalette();
     loadStylePrefs();
-    loadVoiceConfig();
     setAudioRate(NORMAL_AUDIO_RATE);
     applyTableStyle();
     applyFlashStyle();
@@ -3070,127 +3043,59 @@
       return candidates.sort((a,b) => scoreVoice(b) - scoreVoice(a))[0] || null;
     }
 
+    
+    const VOICE_STORAGE_KEY = "flashstudy_voice_config_v1";
+    const defaultVoiceConfig = {
+      provider: "local",
+      workerUrl: "",
+      voices: {
+        ko: "ko-KR-SunHiNeural",
+        es: "es-ES-ElviraNeural"
+      }
+    };
+    let voiceConfig = loadVoiceConfig();
 
     function loadVoiceConfig(){
       try{
-        const saved = JSON.parse(localStorage.getItem(VOICE_CONFIG_KEY) || "{}");
-        voiceConfig = {
-          ...voiceConfig,
-          ...saved
+        const saved = JSON.parse(localStorage.getItem(VOICE_STORAGE_KEY) || "null");
+        return {
+          provider: saved?.provider === "worker" ? "worker" : "local",
+          workerUrl: String(saved?.workerUrl || "").trim(),
+          voices: {
+            ko: String(saved?.voices?.ko || defaultVoiceConfig.voices.ko).trim() || defaultVoiceConfig.voices.ko,
+            es: String(saved?.voices?.es || defaultVoiceConfig.voices.es).trim() || defaultVoiceConfig.voices.es
+          }
         };
-      }catch(err){
-        console.warn("No se pudo cargar la configuración de voz:", err);
-      }
-      syncVoiceForm();
-    }
-
-    function persistVoiceConfig(){
-      localStorage.setItem(VOICE_CONFIG_KEY, JSON.stringify(voiceConfig));
-      renderInfo(getFilteredData());
-    }
-
-    function syncVoiceForm(){
-      if(!voiceProviderSelect) return;
-      voiceProviderSelect.value = voiceConfig.provider || "device";
-      voiceProxyUrlInput.value = voiceConfig.proxyUrl || "";
-      voiceApiKeyInput.value = voiceConfig.apiKey || "";
-      voiceKoInput.value = voiceConfig.koVoice || "ko-KR-SunHiNeural";
-      voiceEsInput.value = voiceConfig.esVoice || "es-ES-ElviraNeural";
-    }
-
-    function setVoiceStatus(message, type = ""){
-      if(!voiceStatus) return;
-      voiceStatus.textContent = message || "";
-      voiceStatus.className = `voice-status${type ? ` ${type}` : ""}`;
-    }
-
-    function normalizeWorkerEndpoint(url){
-      const clean = String(url || "").trim().replace(/\/$/, "");
-      if(!clean) return "";
-      return clean.endsWith("/v1/audio/speech") ? clean : `${clean}/v1/audio/speech`;
-    }
-
-    function getVoiceLabel(){
-      return voiceConfig.provider === "edge-worker" && voiceConfig.proxyUrl
-        ? "Edge TTS"
-        : "Dispositivo";
-    }
-
-    function stopAudioPlayback(){
-      try{
-        speechSynthesis.cancel();
-      }catch(err){}
-      if(currentAudio){
-        try{
-          currentAudio.pause();
-          currentAudio.currentTime = 0;
-        }catch(err){}
-        currentAudio = null;
-      }
-      if(currentAudioUrl){
-        try{
-          URL.revokeObjectURL(currentAudioUrl);
-        }catch(err){}
-        currentAudioUrl = "";
+      }catch(_err){
+        return JSON.parse(JSON.stringify(defaultVoiceConfig));
       }
     }
 
-    function edgeVoiceForLang(lang){
-      return String(lang || "").toLowerCase().startsWith("ko")
-        ? (voiceConfig.koVoice || "ko-KR-SunHiNeural")
-        : (voiceConfig.esVoice || "es-ES-ElviraNeural");
+    function saveVoiceConfig(nextConfig){
+      voiceConfig = {
+        provider: nextConfig?.provider === "worker" ? "worker" : "local",
+        workerUrl: String(nextConfig?.workerUrl || "").trim(),
+        voices: {
+          ko: String(nextConfig?.voices?.ko || defaultVoiceConfig.voices.ko).trim() || defaultVoiceConfig.voices.ko,
+          es: String(nextConfig?.voices?.es || defaultVoiceConfig.voices.es).trim() || defaultVoiceConfig.voices.es
+        }
+      };
+      localStorage.setItem(VOICE_STORAGE_KEY, JSON.stringify(voiceConfig));
+      return voiceConfig;
     }
 
-    function toEdgeSpeed(rateValue){
-      const value = Number(rateValue ?? NORMAL_AUDIO_RATE);
-      if(value <= 0.6) return 0.7;
-      if(value <= 0.8) return 0.85;
-      if(value >= 1.25) return 1.2;
-      return 1.0;
+    function getVoiceForLanguage(lang){
+      return String(lang || "").toLowerCase().startsWith("ko") ? voiceConfig.voices.ko : voiceConfig.voices.es;
     }
 
-    async function speakWithEdgeWorker(text, lang, rateOverride = null){
-      const endpoint = normalizeWorkerEndpoint(voiceConfig.proxyUrl);
-      if(!endpoint){
-        throw new Error("Falta la URL del Worker.");
-      }
-
-      const headers = { "Content-Type": "application/json" };
-      if(String(voiceConfig.apiKey || "").trim()){
-        headers["Authorization"] = `Bearer ${String(voiceConfig.apiKey).trim()}`;
-      }
-
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          model: "tts-1",
-          input: String(text || "").trim(),
-          voice: edgeVoiceForLang(lang),
-          speed: toEdgeSpeed(rateOverride ?? audioRate),
-          response_format: "mp3"
-        })
-      });
-
-      if(!response.ok){
-        const detail = await response.text().catch(() => "");
-        throw new Error(detail || `Error ${response.status} al generar la voz.`);
-      }
-
-      const blob = await response.blob();
-      stopAudioPlayback();
-      currentAudioUrl = URL.createObjectURL(blob);
-      currentAudio = new Audio(currentAudioUrl);
-      await currentAudio.play();
-    }
-
-    function speakWithDevice(text, lang, rateOverride = null){
+    function speakLocal(text, lang, rateOverride = null){
       const clean = String(text || "").trim();
-      if(!clean) return;
+      if(!clean) return Promise.resolve();
       if(!("speechSynthesis" in window)){
-        throw new Error("Tu navegador no soporta síntesis de voz.");
+        alert("Tu navegador no soporta síntesis de voz.");
+        return Promise.resolve();
       }
-      stopAudioPlayback();
+      speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(clean);
       u.lang = lang;
       u.rate = rateOverride ?? audioRate;
@@ -3199,52 +3104,46 @@
       const preferred = pickPreferredVoice(lang);
       if(preferred) u.voice = preferred;
       speechSynthesis.speak(u);
+      return Promise.resolve();
     }
 
-    async function speak(text, lang, rateOverride = null){
+    async function speakViaWorker(text, lang, rateOverride = null){
       const clean = String(text || "").trim();
       if(!clean) return;
-      if(voiceConfig.provider === "edge-worker"){
-        try{
-          await speakWithEdgeWorker(clean, lang, rateOverride);
-          return;
-        }catch(err){
-          console.warn("Fallo Edge TTS, se usa voz del dispositivo:", err);
-          setVoiceStatus(`Edge TTS no respondió. Se ha usado la voz del dispositivo. ${err?.message || ""}`, "bad");
-        }
+      const baseUrl = String(voiceConfig.workerUrl || "").trim();
+      if(!baseUrl) throw new Error("Falta la URL del Worker.");
+      const endpoint = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: clean,
+          voice: getVoiceForLanguage(lang),
+          rate: rateOverride ?? audioRate
+        })
+      });
+
+      if(!response.ok){
+        const message = await response.text().catch(() => "");
+        throw new Error(message || "El Worker devolvió un error.");
       }
-      speakWithDevice(clean, lang, rateOverride);
+
+      const blob = await response.blob();
+      const audioUrl = URL.createObjectURL(blob);
+      const player = new Audio(audioUrl);
+      player.playbackRate = 1;
+      player.addEventListener("ended", () => URL.revokeObjectURL(audioUrl), { once:true });
+      await player.play();
     }
 
-    function openVoiceSettings(){
-      loadVoiceConfig();
-      setVoiceStatus("", "");
-      voiceOverlay?.classList.add("open");
-    }
-
-    function closeVoiceSettings(){
-      voiceOverlay?.classList.remove("open");
-    }
-
-    function saveVoiceSettings(){
-      voiceConfig.provider = voiceProviderSelect?.value || "device";
-      voiceConfig.proxyUrl = String(voiceProxyUrlInput?.value || "").trim();
-      voiceConfig.apiKey = String(voiceApiKeyInput?.value || "").trim();
-      voiceConfig.koVoice = String(voiceKoInput?.value || "").trim() || "ko-KR-SunHiNeural";
-      voiceConfig.esVoice = String(voiceEsInput?.value || "").trim() || "es-ES-ElviraNeural";
-      persistVoiceConfig();
-      setVoiceStatus(`Configuración guardada. Proveedor activo: ${getVoiceLabel()}.`, "ok");
-    }
-
-    async function testVoiceSettings(){
-      saveVoiceSettings();
-      setVoiceStatus("Probando voz...", "");
-      try{
-        await speak("안녕하세요. 한국어 공부는 재밌어.", "ko-KR", NORMAL_AUDIO_RATE);
-        setVoiceStatus(`Prueba correcta con ${getVoiceLabel()}.`, "ok");
-      }catch(err){
-        setVoiceStatus(err?.message || "No se pudo reproducir la voz.", "bad");
+    function speak(text, lang, rateOverride = null){
+      if(voiceConfig.provider === "worker"){
+        return speakViaWorker(text, lang, rateOverride).catch(err => {
+          console.warn("Worker TTS falló. Se usa voz local:", err);
+          return speakLocal(text, lang, rateOverride);
+        });
       }
+      return speakLocal(text, lang, rateOverride);
     }
 
 
@@ -3288,28 +3187,7 @@
       else starredWords.add(row.id);
       persistLists();
       renderCards();
-  
-    if(voiceSettingsBtn) voiceSettingsBtn.addEventListener("click", openVoiceSettings);
-    if(closeVoiceBtn) closeVoiceBtn.addEventListener("click", closeVoiceSettings);
-    if(voiceOverlay) voiceOverlay.addEventListener("click", e => { if(e.target === voiceOverlay) closeVoiceSettings(); });
-    if(saveVoiceBtn) saveVoiceBtn.addEventListener("click", saveVoiceSettings);
-    if(testVoiceBtn) testVoiceBtn.addEventListener("click", testVoiceSettings);
-    if(copyWorkerEndpointBtn) copyWorkerEndpointBtn.addEventListener("click", async () => {
-      const endpoint = normalizeWorkerEndpoint(voiceProxyUrlInput?.value || voiceConfig.proxyUrl || "");
-      if(!endpoint){
-        setVoiceStatus("Primero pega la URL pública de tu Worker.", "bad");
-        return;
-      }
-      try{
-        await navigator.clipboard.writeText(endpoint);
-        setVoiceStatus("Endpoint copiado al portapapeles.", "ok");
-      }catch(err){
-        setVoiceStatus("No se pudo copiar automáticamente. Cópialo manualmente.", "bad");
-      }
-    });
-
-
-    renderDictResults();
+      renderDictResults();
       if(listOverlay.classList.contains("open") && currentListType) renderListRows();
     }
 
@@ -3697,7 +3575,6 @@ ${row.topic ? `<strong>Topic:</strong> ${escapeHtml(row.topic)}` : ""}
         <div class="chip-info"><strong>${topicCount}</strong> topics visibles</div>
         <div class="chip-info"><strong>${starredWords.size}</strong> ⭐</div>
         <div class="chip-info"><strong>${wrongWords.size}</strong> falladas</div>
-        <div class="chip-info"><strong>voz:</strong> ${getVoiceLabel()}</div>
       `;
       selectionChip.textContent = selectedTopics.size === 0 ? "Todos" : `${selectedTopics.size} filtro(s)`;
     }
@@ -5170,59 +5047,50 @@ function toggleSolution() {
 </script>
 
 
-  <!-- VOZ EDGE TTS -->
-  <div class="overlay" id="voiceOverlay">
-    <div class="voice-overlay-card">
+  <div class="voice-overlay" id="voiceOverlay">
+    <div class="voice-wrap">
       <div class="modal-top">
         <div>
-          <div class="modal-title">Voz natural · Cloudflare Worker + Edge TTS</div>
-          <div class="modal-stats">Gratis sin clave de pago. Requiere desplegar tu Worker una sola vez.</div>
+          <div class="modal-title">Configuración de voz</div>
+          <div class="modal-stats">Elige entre voz local o tu Worker de Cloudflare + Edge TTS</div>
         </div>
         <button class="icon-btn" id="closeVoiceBtn">✕</button>
       </div>
 
       <div class="voice-grid">
-        <div class="voice-field">
-          <label for="voiceProviderSelect">Proveedor</label>
-          <select id="voiceProviderSelect">
-            <option value="device">Voz del dispositivo</option>
-            <option value="edge-worker">Cloudflare Worker + Edge TTS</option>
+        <div class="form-field full">
+          <label for="voiceProviderSelect">Proveedor de voz</label>
+          <select id="voiceProviderSelect" class="write-input" style="font-size:16px;margin-bottom:0;">
+            <option value="local">Voz del dispositivo</option>
+            <option value="worker">Cloudflare Worker + Edge TTS</option>
           </select>
         </div>
-        <div class="voice-field">
-          <label for="voiceProxyUrlInput">URL del Worker</label>
-          <input id="voiceProxyUrlInput" type="text" placeholder="https://tu-worker.tu-subdominio.workers.dev" />
+
+        <div class="form-field full">
+          <label for="voiceWorkerUrlInput">URL del Worker</label>
+          <input id="voiceWorkerUrlInput" type="text" placeholder="https://flashstudy-tts.tuusuario.workers.dev" />
         </div>
-        <div class="voice-field">
-          <label for="voiceApiKeyInput">API key del Worker (opcional)</label>
-          <input id="voiceApiKeyInput" type="text" placeholder="sk-tu-clave-opcional" />
-        </div>
-        <div class="voice-field">
+
+        <div class="form-field">
           <label for="voiceKoInput">Voz coreano</label>
           <input id="voiceKoInput" type="text" value="ko-KR-SunHiNeural" />
         </div>
-        <div class="voice-field">
+
+        <div class="form-field">
           <label for="voiceEsInput">Voz español</label>
           <input id="voiceEsInput" type="text" value="es-ES-ElviraNeural" />
         </div>
       </div>
 
-      <div class="study-bottom">
-        <div class="study-group">
-          <button class="action-btn" id="saveVoiceBtn">Guardar</button>
-          <button class="action-btn secondary" id="testVoiceBtn">Probar voz</button>
-          <button class="action-btn ghost" id="copyWorkerEndpointBtn">Copiar endpoint</button>
-        </div>
-      </div>
-
-      <div class="voice-status" id="voiceStatus"></div>
+      <div class="voice-status-box" id="voiceStatusBox"></div>
 
       <div class="voice-help">
-        <strong>Qué hace esta opción:</strong> la app puede seguir usando la voz del dispositivo o enviar el texto a tu Cloudflare Worker para que este genere una voz más natural con Edge TTS.
-        <br><br>
-        <strong>Qué tienes que pegar:</strong> la URL pública de tu Worker. La app añadirá automáticamente <code>/v1/audio/speech</code> si hace falta.
-        <br><br>
-        <strong>Qué archivos usar:</strong> dentro del ZIP encontrarás la carpeta <code>cloudflare-worker</code> con <code>worker.js</code>, <code>package.json</code> y <code>wrangler.jsonc</code>.
+        Usa <strong>Cloudflare Worker + Edge TTS</strong> para una voz más natural. Si el Worker falla, la app volverá automáticamente a la voz local del dispositivo.
+      </div>
+
+      <div class="edit-actions">
+        <button class="action-btn secondary" id="voiceTestBtn">Probar voz</button>
+        <button class="action-btn" id="voiceSaveBtn">Guardar</button>
       </div>
     </div>
   </div>

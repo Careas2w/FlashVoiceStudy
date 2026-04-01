@@ -1,25 +1,22 @@
-# Korean Flashstudy · Edge TTS listo
+# Korean Flashstudy · Edge TTS Worker fix
 
-Esta versión añade una opción de voz más natural usando **Cloudflare Worker + Edge TTS**.
+Esta versión corrige:
+- botón 🗣 Voz operativo
+- configuración de URL del Worker
+- prueba de voz desde la app
+- fallback automático a la voz del dispositivo
+- rutas de iconos consistentes
+- caché actualizada
 
-## Qué he dejado preparado
-- Botón **🗣 Voz** dentro de la app.
-- Configuración guardada en el navegador.
-- Fallback automático a la voz del dispositivo si el Worker falla.
-- Worker listo en la carpeta `cloudflare-worker`.
-- Soporte para voz coreana y española.
-- Endpoint compatible con `POST /v1/audio/speech`.
+## Qué hacer
+1. Sustituye el contenido de tu repo de GitHub Pages por estos archivos.
+2. Espera a que publique GitHub Pages.
+3. Abre la web y fuerza recarga con Ctrl+F5.
+4. Pulsa 🗣 Voz.
+5. Elige `Cloudflare Worker + Edge TTS`.
+6. Pega la URL de tu Worker.
+7. Guarda y prueba.
 
-## Lo único que tienes que hacer tú
-1. Subir esta app a GitHub Pages.
-2. Desplegar el Worker de la carpeta `cloudflare-worker` en Cloudflare.
-3. Copiar la URL pública del Worker.
-4. En la app:
-   - pulsa **🗣 Voz**
-   - elige **Cloudflare Worker + Edge TTS**
-   - pega la URL del Worker
-   - guarda
-   - prueba la voz
-
-## Nota importante
-Edge TTS no es una API comercial oficial de pago. Esta solución no requiere pagar API keys, pero puede cambiar o limitarse si Microsoft modifica el servicio.
+## URL de la web
+Esta versión está preparada para publicarse en:
+https://careas2w.github.io/FlashVoiceStudy/
