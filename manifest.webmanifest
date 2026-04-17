@@ -1,0 +1,15 @@
+{
+  "name": "Korean Flashstudy Pro",
+  "short_name": "K-Study",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f1020",
+  "theme_color": "#8b5cf6",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/5111/5111586.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
