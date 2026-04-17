@@ -1,0 +1,8 @@
+{
+  "name": "Korean Flashstudy",
+  "short_name": "Flashstudy",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f1020",
+  "theme_color": "#8b5cf6"
+}
